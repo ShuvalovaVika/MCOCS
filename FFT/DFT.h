@@ -8,18 +8,21 @@
 #include <string>
 #include <algorithm>
 
-typedef std::complex<double> complex_temp;
-typedef std::vector<complex_temp> ComplexVect;
+typedef std::complex<double> complex;
+typedef std::vector<complex> ComplexVect;
 
 class My_DFT {
 public:
-	ComplexVect x, y;
-	ComplexVect coef;
+	ComplexVect x_input;
+	ComplexVect x_IDFT, y_DFT;
+	ComplexVect x_IFFT, y_FFT;
+	size_t N;
 
 	My_DFT(std::string fileName);
+	My_DFT(ComplexVect input);
 	
-	complex_temp inline omega(int k, int l, int sign);
-	complex_temp inline exponent(int N, int j, int k, int sign);
+	complex inline omega(int k, int l, int sign);
+	complex inline exponent(int N, int j, int k, int sign);
 	ComplexVect DiscreteFourierTransform(int sign);
 	ComplexVect InverseDiscreteFourierTransform(int sign);
 	ComplexVect FastFourierTransform(int sign);
@@ -27,10 +30,9 @@ public:
 	ComplexVect Convolution(ComplexVect vector_x1, ComplexVect vector_x2);
 	ComplexVect ConvolutionFFT(ComplexVect vector_x1, ComplexVect vector_x2);
 	ComplexVect ConvolutionFFT(ComplexVect vector_x1, ComplexVect vector_x2, int result_size, int max_size);
-
-	void ReadFile(std::string filename);
-	bool WriteFile(ComplexVect vector_r, std::string filename);
 };
 
+bool WriteFile(ComplexVect vector_r, std::string filename);
+ComplexVect ReadFile(std::string filename);
 bool Comparison(std::string file1, std::string file2);
 void InaccuracyComparison(std::string file1, std::string file2, std::string Inaccuracy);

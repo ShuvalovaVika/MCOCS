@@ -10,8 +10,8 @@ int main()
 	try
 	{
 		DFT = new My_DFT(fileName);
-		DFT->WriteFile(DFT->DiscreteFourierTransform(-1), "DFT.txt");
-		DFT->WriteFile(DFT->InverseDiscreteFourierTransform(1), "IDFT.txt");
+		WriteFile(DFT->DiscreteFourierTransform(-1), "DFT.txt");
+		WriteFile(DFT->InverseDiscreteFourierTransform(1), "IDFT.txt");
 		std::cout << "Calculating DFT and IDFT is over. You can see the results in DFT.txt, IDFT.txt" << std::endl;
 	} catch (const char* ex)
 	{
@@ -21,8 +21,8 @@ int main()
 	try
 	{
 		DFT = new My_DFT(fileName);
-		DFT->WriteFile(DFT->FastFourierTransform(-1), "FFT.txt");
-		DFT->WriteFile(DFT->InverseFastFourierTransform(1), "IFFT.txt");
+		WriteFile(DFT->FastFourierTransform(-1), "FFT.txt");
+		WriteFile(DFT->InverseFastFourierTransform(1), "IFFT.txt");
 		std::cout << "Calculating FFT and IFFT is over. You can see the results in FFT.txt, IFFT.txt" << std::endl;
 	}
 	catch (const char* ex)
