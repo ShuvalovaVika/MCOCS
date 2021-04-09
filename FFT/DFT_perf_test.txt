@@ -1,0 +1,14 @@
+N = 2 Time: 0
+N = 4 Time: 0
+N = 8 Time: 0
+N = 16 Time: 0
+N = 32 Time: 0
+N = 64 Time: 3
+N = 128 Time: 15
+N = 256 Time: 90
+N = 512 Time: 312
+N = 1024 Time: 1275
+N = 2048 Time: 4666
+N = 4096 Time: 18788
+N = 8192 Time: 88282
+N = 16384 Time: 321525

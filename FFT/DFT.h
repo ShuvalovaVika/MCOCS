@@ -7,6 +7,7 @@
 #include <complex>
 #include <string>
 #include <algorithm>
+#include <chrono>
 
 typedef std::complex<double> complex;
 typedef std::vector<complex> ComplexVect;
@@ -33,6 +34,7 @@ public:
 };
 
 bool WriteFile(ComplexVect vector_r, std::string filename);
+bool WriteFile(std::string ss, std::string filename);
 ComplexVect ReadFile(std::string filename);
 bool Comparison(std::string file1, std::string file2);
 void InaccuracyComparison(std::string file1, std::string file2, std::string Inaccuracy);

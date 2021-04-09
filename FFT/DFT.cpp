@@ -26,12 +26,14 @@ My_DFT::My_DFT(ComplexVect input)
 
 inline complex My_DFT::omega(int k, int l, int sign)
 {
-	return exp(complex(0, (double)sign * 2.0 * M_PI * (double)l / (double)(pow(2., k))));
+	return complex(cos((double)sign * 2.0 * M_PI * (double)l / (double)(powf(2., k))),
+		sin((double)sign * 2.0 * M_PI * (double)l / (double)(powf(2., k))));
+	//return exp(complex(10, 10));
 }
 
 inline complex My_DFT::exponent(int N, int j, int k, int sign)
 {
-	return exp(complex(0, (double)sign * 2.0 * M_PI * (double)j * (double)k / ((double)N)));
+	return exp(complex(0, (double)sign * 2 * M_PI * (double)j * (double)k / ((double)N)));
 }
 
 ComplexVect My_DFT::DiscreteFourierTransform(int sign) // DPF formula 1
@@ -49,7 +51,7 @@ ComplexVect My_DFT::DiscreteFourierTransform(int sign) // DPF formula 1
 	return y_DFT;
 }
 
-ComplexVect My_DFT::InverseDiscreteFourierTransform(int sign)
+ComplexVect My_DFT::InverseDiscreteFourierTransform(int sign) //ОДПФ 2 формула
 {
 	for (int j = 0; j < N; j++)
 	{
@@ -75,8 +77,8 @@ ComplexVect My_DFT::FastFourierTransform(int sign)
 			{
 				int even = j * (1 << (n + 1 - k)) + l;
 				int odd = even + (1 << (n - k));
-				y_FFT[even] = x_input[even] + x_input[odd];
-				y_FFT[odd] = (x_input[even] - x_input[odd]) * omega(n + 1 - k, l, sign);
+				y_FFT[even] = (x_input[even] + x_input[odd]);
+				y_FFT[odd] = (x_input[even] - x_input[odd]) * omega(l, n - k + 1, sign);
 			}
 		}
 	}
@@ -118,8 +120,8 @@ ComplexVect My_DFT::InverseFastFourierTransform(int sign)
 			{
 				int even = j * (1 << (n + 1 - k)) + l;
 				int odd = even + (1 << (n - k));
-				x_IFFT[even] = y_FFT[even] + y_FFT[odd];
-				x_IFFT[odd] = (y_FFT[even] - y_FFT[odd]) * omega(n + 1 - k, l, sign);
+				x_IFFT[even] = (y_FFT[even] + y_FFT[odd]);
+				x_IFFT[odd] = (y_FFT[even] - y_FFT[odd]) * omega(l, n - k + 1, sign);
 			}
 		}
 	}
@@ -244,7 +246,7 @@ ComplexVect ReadFile(std::string filename)
 	{
 		double var2, var3;
 
-		if (!in.eof())
+		if (!in.eof()) //in.eof() - проверка конца файла
 			in >> var2 >> var3;
 
 		while (!in.eof())
@@ -276,6 +278,22 @@ bool WriteFile(ComplexVect vector_r, std::string filename)
 	{
 		in << "    " << vector_r[i].real() << "    " << vector_r[i].imag() << std::endl;
 	}
+
+	in.close();
+	return true;
+}
+
+bool WriteFile(std::string ss, std::string filename)
+{
+	std::ofstream in(filename);
+
+	if (!in)
+	{
+		throw "File couldn't be opened!";
+		return false;
+	}
+
+	in << ss;
 
 	in.close();
 	return true;
