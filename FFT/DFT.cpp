@@ -26,9 +26,7 @@ My_DFT::My_DFT(ComplexVect input)
 
 inline complex My_DFT::omega(int k, int l, int sign)
 {
-	return complex(cos((double)sign * 2.0 * M_PI * (double)l / (double)(powf(2., k))),
-		sin((double)sign * 2.0 * M_PI * (double)l / (double)(powf(2., k))));
-	//return exp(complex(10, 10));
+	return exp(complex(0, (double)sign * 2.0 * M_PI * (double)l / (double)(powf(2., k))));
 }
 
 inline complex My_DFT::exponent(int N, int j, int k, int sign)
@@ -69,6 +67,8 @@ ComplexVect My_DFT::FastFourierTransform(int sign)
 {
 	int n = log2(N);
 
+	ComplexVect tmp(x_input);
+
 	for (int k = 1; k < n + 1; k++)
 	{
 		for (int j = 0; j < (1 << (k - 1)); j++)
@@ -77,13 +77,15 @@ ComplexVect My_DFT::FastFourierTransform(int sign)
 			{
 				int even = j * (1 << (n + 1 - k)) + l;
 				int odd = even + (1 << (n - k));
-				y_FFT[even] = (x_input[even] + x_input[odd]);
-				y_FFT[odd] = (x_input[even] - x_input[odd]) * omega(l, n - k + 1, sign);
+				y_FFT[even] = (tmp[even] + tmp[odd]);
+				y_FFT[odd] = (tmp[even] - tmp[odd]) * omega(l, n - k + 1, sign);
 			}
 		}
+		tmp = y_FFT;
 	}
 
-	ComplexVect z(y_FFT);
+	ComplexVect z(tmp);
+	z[0] = tmp[0];
 
 	for (int k = 1; k < N - 1; k++)
 	{
@@ -95,17 +97,17 @@ ComplexVect My_DFT::FastFourierTransform(int sign)
 				inverse += (1 << (n - 1 - j));
 			temp = temp << 1;
 		}
-		z[k] = y_FFT[inverse];
+		z[k] = tmp[inverse];
 	}
 
-	y_FFT = z;
+	tmp = z;
 
 	for (size_t i = 0; i < N; i++)
-		y_FFT[i] /= (double)sqrt(N);
+		tmp[i] /= (double)sqrt(N);
 	/*for (size_t i = 0; i < N; i++)
 		y_FFT[i] *= 2;*/
 
-	return y_FFT;
+	return tmp;
 }
 
 ComplexVect My_DFT::InverseFastFourierTransform(int sign)
