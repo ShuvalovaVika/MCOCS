@@ -13,7 +13,8 @@ int main()
 		WriteFile(DFT->DiscreteFourierTransform(-1), "DFT.txt");
 		WriteFile(DFT->InverseDiscreteFourierTransform(1), "IDFT.txt");
 		std::cout << "Calculating DFT and IDFT is over. You can see the results in DFT.txt, IDFT.txt" << std::endl;
-	} catch (const char* ex)
+	}
+	catch (const char* ex)
 	{
 		std::cout << ex;
 	}
@@ -22,27 +23,28 @@ int main()
 	try
 	{
 		DFT = new My_DFT(fileName);
-		WriteFile(DFT->FastFourierTransform(-1), "FFT.txt");
-		WriteFile(DFT->InverseFastFourierTransform(1), "IFFT.txt");
+		WriteFile(DFT->FastFourierTransform(1), "FFT.txt");
+		WriteFile(DFT->InverseFastFourierTransform(-1), "IFFT.txt");
 		std::cout << "Calculating FFT and IFFT is over. You can see the results in FFT.txt, IFFT.txt" << std::endl;
 	}
 	catch (const char* ex)
 	{
 		std::cout << ex;
 	}
-	
+
 	try
 	{
 		std::cout << "Comparison input vector and IDFT. Task 3" << std::endl;
-		if (Comparison(fileName, "IDFT.txt"))
+		if (Comparison(fileName, "IDFT.txt", "IDFT_err.txt"))
 		{
 			std::cout << "Comparison input vector and IDFT is successfully" << std::endl;
-		} else 
+		}
+		else
 		{
 			std::cout << "Comparison input vector and IDFT is unsuccessfully" << std::endl;
 		}
 		std::cout << "Comparison input vector and IFFT. Task 3" << std::endl;
-		if (Comparison(fileName, "IFFT.txt"))
+		if (Comparison(fileName, "IFFT.txt", "IFFT_err.txt"))
 		{
 			std::cout << "Comparison input vector and IFFT is successfully" << std::endl;
 		}
@@ -58,6 +60,7 @@ int main()
 	{
 		std::cout << ex;
 	}
+
 	
 	std::cout << "Calculating DFT and FFT performance. Task 4" << std::endl;
 	try
@@ -66,13 +69,14 @@ int main()
 		ComplexVect tmp = ReadFile("test_1.txt");
 		std::chrono::time_point <std::chrono::steady_clock> start, end;
 		std::stringstream ss;
+		ss.precision(std::numeric_limits<double>::max_digits10);
 		for (int i = 1; i < 15; i++)
 		{
 			DFT = new My_DFT(ComplexVect(tmp.begin(), tmp.begin() + (1 << i)));
 			start = std::chrono::steady_clock::now();
 			DFT->DiscreteFourierTransform(-1);
 			end = std::chrono::steady_clock::now();
-			
+
 			ss << "N = " << (1 << i) << " Time: " <<
 				std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
 		}
@@ -140,7 +144,7 @@ int main()
 
 		std::cout << "One vector with fixed length:" << std::endl;
 		std::cout << "ConvFFT\tConv" << std::endl;
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < 2; j++)
 		{
 			ComplexVect vector_x1(x.begin(), x.begin() + pow(2, j)), vector_x2(y.begin(), y.begin() + pow(2, 3));
 
@@ -154,9 +158,10 @@ int main()
 			{
 				vector_x2.push_back(0);
 			}
-			auto var1 = My_DFT(vector_x1).FastFourierTransform(1);
-			auto var2 = My_DFT(vector_x2).FastFourierTransform(1);
-
+		  // auto var1 = My_DFT(vector_x1).FastFourierTransform(1);
+			//auto var2 = My_DFT(vector_x2).FastFourierTransform(1);
+			auto var1 = My_DFT(vector_x1).FastFourierTransform(-1);
+			auto var2 = My_DFT(vector_x2).FastFourierTransform(-1);
 			start1 = std::chrono::steady_clock::now();
 			My_DFT(vector_x1).ConvolutionFFT(var1, var2, result_size, max_size);
 			end1 = std::chrono::steady_clock::now();
@@ -171,7 +176,7 @@ int main()
 
 		std::cout << "Both vectors change the lengths:" << std::endl;
 		std::cout << "ConvFFT\tConv" << std::endl;
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < 4; j++)
 		{
 			ComplexVect vector_x1(x.begin(), x.begin() + pow(2, j)), vector_x2(y.begin(), y.begin() + pow(2, j));
 
@@ -186,8 +191,10 @@ int main()
 				vector_x2.push_back(0);
 			}
 
-			auto var1 = My_DFT(vector_x1).FastFourierTransform(1);
-			auto var2 = My_DFT(vector_x2).FastFourierTransform(1);
+			//auto var1 = My_DFT(vector_x1).FastFourierTransform(1);
+			//auto var2 = My_DFT(vector_x2).FastFourierTransform(1);
+			auto var1 = My_DFT(vector_x1).FastFourierTransform(-1);
+			auto var2 = My_DFT(vector_x2).FastFourierTransform(-1);
 
 			start1 = std::chrono::steady_clock::now();
 			My_DFT(vector_x1).ConvolutionFFT(var1, var2, result_size, max_size);
@@ -206,3 +213,4 @@ int main()
 		std::cout << ex;
 	}
 }
+

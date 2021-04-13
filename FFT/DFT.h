@@ -8,6 +8,7 @@
 #include <string>
 #include <algorithm>
 #include <chrono>
+#include <ctime>
 
 typedef std::complex<double> complex;
 typedef std::vector<complex> ComplexVect;
@@ -21,7 +22,7 @@ public:
 
 	My_DFT(std::string fileName);
 	My_DFT(ComplexVect input);
-	
+
 	complex inline omega(int k, int l, int sign);
 	complex inline exponent(int N, int j, int k, int sign);
 	ComplexVect DiscreteFourierTransform(int sign);
@@ -36,5 +37,5 @@ public:
 bool WriteFile(ComplexVect vector_r, std::string filename);
 bool WriteFile(std::string ss, std::string filename);
 ComplexVect ReadFile(std::string filename);
-bool Comparison(std::string file1, std::string file2);
+bool Comparison(std::string file1, std::string file2, std::string fileName);
 void InaccuracyComparison(std::string file1, std::string file2, std::string Inaccuracy);

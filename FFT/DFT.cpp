@@ -24,10 +24,19 @@ My_DFT::My_DFT(ComplexVect input)
 	y_FFT.resize(N, 0.0);
 }
 
-inline complex My_DFT::omega(int k, int l, int sign)
+
+/*inline complex My_DFT::omega(int k, int l, int sign)
 {
 	return exp(complex(0, (double)sign * 2.0 * M_PI * (double)l / (double)(powf(2., k))));
-}
+}*/
+
+inline complex My_DFT::omega(int l, int k, int sign)
+{
+	complex i = complex(0, 1);
+	complex omega = exp((-2 * (double)sign * M_PI * l / pow(2, k)) * i);
+	return omega;
+};
+
 
 inline complex My_DFT::exponent(int N, int j, int k, int sign)
 {
@@ -59,14 +68,29 @@ ComplexVect My_DFT::InverseDiscreteFourierTransform(int sign) //ОДПФ 2 формула
 		}
 		x_IDFT[j] = x_IDFT[j] / sqrt(N);
 	}
-	
+
 	return x_IDFT;
 }
+
+
+int invert(int i, int n)
+{
+	int u = 0;
+	int q;
+	for (int k = 0; k < n; ++k)
+	{
+		q = i % 2;
+		if (q == 1) u = u + pow(2, n - k - 1);
+		i = i / 2;
+	}
+	return u;
+}
+
 
 ComplexVect My_DFT::FastFourierTransform(int sign)
 {
 	int n = log2(N);
-
+	
 	ComplexVect tmp(x_input);
 
 	for (int k = 1; k < n + 1; k++)
@@ -77,14 +101,15 @@ ComplexVect My_DFT::FastFourierTransform(int sign)
 			{
 				int even = j * (1 << (n + 1 - k)) + l;
 				int odd = even + (1 << (n - k));
-				y_FFT[even] = (tmp[even] + tmp[odd]);
-				y_FFT[odd] = (tmp[even] - tmp[odd]) * omega(l, n - k + 1, sign);
+				y_FFT[even] = tmp[even] + tmp[odd];
+				y_FFT[odd] = (tmp[even] - tmp[odd]) * omega(l, n + 1 - k, sign);
 			}
 		}
+
 		tmp = y_FFT;
 	}
 
-	ComplexVect z(tmp);
+	/*ComplexVect z(tmp);
 	z[0] = tmp[0];
 
 	for (int k = 1; k < N - 1; k++)
@@ -99,20 +124,41 @@ ComplexVect My_DFT::FastFourierTransform(int sign)
 		}
 		z[k] = tmp[inverse];
 	}
+	tmp[N - 1] =z[N - 1];
 
-	tmp = z;
+	//z = tmp;
+	//tmp = z;
 
 	for (size_t i = 0; i < N; i++)
 		tmp[i] /= (double)sqrt(N);
-	/*for (size_t i = 0; i < N; i++)
-		y_FFT[i] *= 2;*/
-
 	return tmp;
+}*/
+
+	int u;
+	complex d;
+	for (int i = 0; i < N; ++i) //перестановка
+	{
+		u = invert(i, n);
+		if (u >= i)
+		{
+			d = y_FFT[i];
+			y_FFT[i] = y_FFT[u];
+			y_FFT[u] = d;
+		}
+	}
+	
+	for (int i = 0; i < N; ++i) 
+	{
+		y_FFT[i] = y_FFT[i] / sqrt(N);
+	}
+	return y_FFT;
 }
+
 
 ComplexVect My_DFT::InverseFastFourierTransform(int sign)
 {
 	int n = log2(N);
+	ComplexVect tmp(y_FFT);
 
 	for (int k = 1; k < n + 1; k++)
 	{
@@ -122,36 +168,33 @@ ComplexVect My_DFT::InverseFastFourierTransform(int sign)
 			{
 				int even = j * (1 << (n + 1 - k)) + l;
 				int odd = even + (1 << (n - k));
-				x_IFFT[even] = (y_FFT[even] + y_FFT[odd]);
-				x_IFFT[odd] = (y_FFT[even] - y_FFT[odd]) * omega(l, n - k + 1, sign);
+				x_IFFT[even] = (tmp[even] + tmp[odd]);
+				x_IFFT[odd] = (tmp[even] - tmp[odd]) * omega(l, n - k + 1, sign);
 			}
 		}
+		tmp = x_IFFT;
 	}
 
-	ComplexVect z(x_IFFT);
-
-	for (int k = 1; k < N - 1; k++)
+	int u;
+	complex d;
+	for (int i = 0; i < N; ++i) //перестановка
 	{
-		int temp = 1;
-		int inverse = 0;
-		for (int j = 0; j < n; j++)
+		u = invert(i, n);
+		if (u >= i)
 		{
-			if (temp & k)
-				inverse += (1 << (n - 1 - j));
-			temp = temp << 1;
+			d = tmp[i];
+			tmp[i] = tmp[u];
+			tmp[u] = d;
 		}
-		z[k] = x_IFFT[inverse];
 	}
 
-	x_IFFT = z;
-
-	for (size_t i = 0; i < N; i++)
-		x_IFFT[i] /= (double)sqrt(N);// x[i] = x[i] / sqrt
-	/*for (size_t i = 0; i < N; i++)
-		x_IFFT[i] *= 2;// x[i] = x[i] / sqrt*/
-
-	return x_IFFT;
+	for (int i = 0; i < N; ++i) 
+	{
+		tmp[i] = tmp[i] / sqrt(N);
+	}
+	return tmp;
 }
+
 
 ComplexVect My_DFT::Convolution(ComplexVect x, ComplexVect y)
 {
@@ -209,15 +252,15 @@ ComplexVect My_DFT::ConvolutionFFT(ComplexVect x, ComplexVect y)
 		count++;
 	}
 
-	var1 = My_DFT(var1).FastFourierTransform(-1);
-	var2 = My_DFT(var2).FastFourierTransform(-1);
+	var1 = My_DFT(var1).FastFourierTransform(1);
+	var2 = My_DFT(var2).FastFourierTransform(1);
 
 	for (unsigned int k = 0; k < max_size; k++)
 	{
 		result[k] = var1[k] * var2[k] * sqrt(max_size);
 	}
 
-	result = My_DFT(result).FastFourierTransform(1);
+	result = My_DFT(result).FastFourierTransform(-1);
 
 	return result;
 }
@@ -270,13 +313,14 @@ bool WriteFile(ComplexVect vector_r, std::string filename)
 {
 	std::ofstream in(filename);
 
-	if (!in) 
+	if (!in)
 	{
 		throw "File couldn't be opened!";
 		return false;
 	}
-
-	for (unsigned int i = 0; i < vector_r.size(); i++) 
+	std::numeric_limits< double > tmp;
+	in.precision(std::streamsize(tmp.max_digits10));
+	for (unsigned int i = 0; i < vector_r.size(); i++)
 	{
 		in << "    " << vector_r[i].real() << "    " << vector_r[i].imag() << std::endl;
 	}
@@ -295,14 +339,17 @@ bool WriteFile(std::string ss, std::string filename)
 		return false;
 	}
 
+	in.precision(std::numeric_limits<double>::max_digits10);
+
 	in << ss;
 
 	in.close();
 	return true;
 }
 
-bool Comparison(std::string file1, std::string file2)
+bool Comparison(std::string file1, std::string file2, std::string fileName)
 {
+	/*
 	std::ifstream in(file1);
 	ComplexVect first = ReadFile(file1);
 	ComplexVect second = ReadFile(file2);
@@ -314,6 +361,16 @@ bool Comparison(std::string file1, std::string file2)
 		if (!(std::fabs(first[i].imag() - second[i].imag()) < std::numeric_limits<double>::epsilon()))
 			return false;
 	}
+	return true;*/
+	ComplexVect first = ReadFile(file1);
+	ComplexVect second = ReadFile(file2);
+	ComplexVect err(first.size(), 0);
+	size_t size = first.size();
+	for (size_t i = 0; i < size; i++)
+	{
+		err[i] = (first[i] - second[i]) * (first[i] - second[i]);
+	}
+	WriteFile(err, fileName);
 	return true;
 }
 
@@ -330,6 +387,8 @@ void InaccuracyComparison(std::string file1, std::string file2, std::string Inac
 	}
 
 	auto max = max_element(result.begin(), result.end(), [](complex v1, complex v2) {return abs(v1) < abs(v2); });
+
+	std::cout.precision(std::numeric_limits<double>::max_digits10);
 
 	for (size_t i = 0; i < size; i++)
 	{
